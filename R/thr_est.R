@@ -105,13 +105,23 @@
 #'
 #' @export
 #'
-thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
-                    conf2 = .8, nonpar = 2, graph = TRUE, signif.level = "stars",
-                    inf.crit = FALSE,
-                    digits = 3, integer.digits = NULL, digits.thr = digits,
-                    header = NULL, output.short = FALSE, signif.legend = TRUE) {
 
-  if ((h != 0)*(h != 1)){
+# Note that this newer implementation still vomits out latex code to the console
+# but this is safe to ignore
+# and now have proper return values you can access
+thr_est <- function(
+  df, yi, xi, qi, h,
+  test.pvalue = 0.05,
+  var.names = colnames(df),
+  conf2 = .95,
+  nonpar = 2,
+  graph = FALSE,
+  signif.level = "stars",
+  inf.crit = FALSE,
+  digits = 3, integer.digits = NULL, digits.thr = digits,
+  header = NULL, output.short = TRUE, signif.legend = TRUE) {
+  # Warning Messages
+  if ((h != 0)*(h != 1)) {
     cat("You have entered h = ", h, "\n",
         "This number must be either 0 (homoskedastic case) or 1 (heteoskedastic)",
         "\n", "The function will either crash or produce invalid results", "\n")
@@ -122,7 +132,7 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
         "or 2 (kernel regression)", "\n",
         "The function will employ the quadratic regression method", "\n", "\n")
   }
-
+  # Prepare data into matrix format -----------------------------
   dat <- as.matrix(df)
   if (is.character(yi)) yi <- which(colnames(df) == yi)
   if (is.character(xi)) xi <- which(colnames(df) %in% xi)
@@ -138,15 +148,15 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
   yname <- var.names[yi]
   qname <- var.names[qi]
   xname <- rbind("Const",as.matrix(var.names[xi]))
-
+  # Begin actual optimization ---------------------------------
   mi <- solve(t(x)%*%x, tol = 1e-1000)
   beta <- mi%*%(t(x)%*%y)
   e <- y-x%*%beta
   ee <- t(e)%*%e
   sig <- ee/(n-k)
-  xe <- x*(e%*%matrix(c(1),1,k))
+  xe <- x*(e %*% matrix(c(1),1,k))
   if (h==0) {se <- sqrt(diag(mi)*sig)
-  }else{ se <- sqrt(diag(mi%*%t(xe)%*%xe%*%mi))}
+  }else{ se <- sqrt(diag(mi %*% t(xe) %*% xe %*% mi))}
   vy <- sum((y - mean(y))^2)
   r_2 <- 1-ee/vy
 
@@ -167,7 +177,7 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
   ci <- 0
 
   r <- 1
-  while (r<=qn){
+  while (r <= qn){
     irf <- (q <= qs[r])
     ir <- irf - irb
     irb <- irf
@@ -191,7 +201,7 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
   sighat <- smin/n
 
   i1 <- (q <= qhat)
-  i2 <- (1-i1)>0
+  i2 <- (1 - i1) > 0
   x1 <- as.matrix(x[i1%*%matrix(c(1),1,k)>0])
   x1 <- matrix(x1,nrow=nrow(x1)/k,ncol=k)
   y1 <- as.matrix(y[i1])
@@ -215,7 +225,7 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
   if (h==0){
     se1 <- sqrt(diag(mi1)*sig_jt)
     se2 <- sqrt(diag(mi2)*sig_jt)
-  }else{
+  } else {
     xe1 <- x1*(e1%*%matrix(c(1),1,k))
     xe2 <- x2*(e2%*%matrix(c(1),1,k))
     se1 <- sqrt(diag(mi1%*%t(xe1)%*%xe1%*%mi1))
@@ -248,9 +258,9 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
   hqc_2 <- n2*log(ee2/n2) + 2*k*log(log(n2))
 
 
-  if (h==0) lr <- (sn-smin)/sighat
-  if (h==1){
-    r1 <- (x%*%(beta1-beta2))^2
+  if (h == 0) lr <- (sn-smin)/sighat
+  if (h == 1){
+    r1 <- (x %*% (beta1-beta2))^2
     r2 <- r1*(ej^2)
     qx <- cbind(q^0,q^1,q^2)
     qh <- cbind(qhat^0,qhat^1,qhat^2)
@@ -280,7 +290,7 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
   # MK
   tstars1 <- rep("", k)
   tstars2 <- rep("", k)
-
+  # Intiialize empty lists
   qhat1_list <- list()
   qhat2_list <- list()
   beta1l_list <- list()
@@ -288,24 +298,27 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
   beta2l_list <- list()
   beta2u_list <- list()
 
-  # MK: Loop over different confidence levels
+  # MK: Loop over different confidence levels ---------------------------
+  # (I think this is really unnecessary)
   conf1_levels <- c(.9, .95, .99)
 
   for (i in 1:length(conf1_levels)) {
 
     conf1 <- conf1_levels[i]
-    c1 <- -2*log(1-sqrt(conf1))
-    c2 <- -2*log(1-sqrt(conf2))
+    c1 <- -2*log(1 - sqrt(conf1))
+    c2 <- -2*log(1 - sqrt(conf2))
     lr1 <- (lr >= c1)
     lr2 <- (lr >= c2)
-    if (max(lr1)==1){
+    if (max(lr1) == 1) {
       qhat1 <- qs[which.min(lr1)]
-      qhat2 <- qs[qn+1-which.min(rev(lr1))]
-    }else{
+      qhat2 <- qs[qn + 1 - which.min(rev(lr1))]
+    }
+    # qhat se?
+    else {
       qhat1 <- qs[1]
       qhat2 <- qs[qn]
     }
-    z <- which.max((pnorm(seq(.01,3,by=.01))*2-1) >= conf1)/100;
+    z <- which.max((pnorm(seq(.01, 3, by = .01))*2 - 1) >= conf1)/100;
     beta1l <- beta1 - se1*z
     beta1u <- beta1 + se1*z
     beta2l <- beta2 - se2*z
@@ -385,7 +398,8 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
 
   }
 
-  het_test <- function(e,x) {
+  # Heteroskedasticity test
+  het_test <- function(e, x) {
     e2 <- e^2
     x2 <- x^2
     v <- e2 - x2%*%qr.solve(x2,e2)
@@ -395,8 +409,12 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
     out
   }
 
+  # Long Output -----------------------------------------------------------
   if (output.short == FALSE) {
+    # Title ----------------------------------------------------------
     cat(paste0("\\subsection{Estimate Sample Split, Using ", qname, "}"), "\n\n")
+
+    # Null Model (No Threshold) ---------------------------------------
     cat("\\subsubsection{Global OLS Estimation, Without Threshold}", "\n")
     cat("Dependent Variable:     ", yname, "\\\\\n")
     if (h==1) cat("Heteroskedasticity Correction Used", "\\\\\\\\")
@@ -421,10 +439,13 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
     cat("AIC:                               ", aic, "\\\\\n")
     cat("BIC:                               ", bic, "\\\\\n")
     cat("HQC:                               ", hqc, "\\\\\n")
-    #
-    cat("Heteroskedasticity Test (P-Value): ", het_test(e,x), "\\\\\n")
+    # HTSK Test
+    cat("Heteroskedasticity Test (P-Value): ", het_test(e, x), "\\\\\n")
     cat("\n")
 
+    # Joint Model Output ---------------------------------------------
+    # This is just a summary of joint model selection criteria,
+    # not actual need for outputting joint model intercepts
     cat("\\subsubsection{Threshold Estimation}", "\n")
     cat("Threshold Variable:                ", qname, "\\\\\n")
     cat("Threshold Estimate:                ", qhat, "\\\\\n")
@@ -442,10 +463,11 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
     cat("Joint AIC:                         ", aic_joint, "\\\\\n")
     cat("Joint BIC:                         ", bic_joint, "\\\\\n")
     cat("Joint HQC:                         ", hqc_joint, "\\\\\n")
-    #
+    # HTSK Test
     cat("Heteroskedasticity Test (P-Value): ", het_test(ej,x), "\\\\\n")
     cat("\n")
 
+    # Regime 1 Output -----------------------------------------------
     tit <- paste(qname,"$\\leq$",format(qhat,digits=6),sep="")
     cat("\\subsubsection*{Regime 1:", tit, "}", "\n")
     cat("Parameter Estimates", "\\\\\n")
@@ -486,6 +508,7 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
     #
     cat("\n")
 
+    # Regime 2 Output --------------------------------------------------
     tit <- paste(qname,"$>$",format(qhat,digits=6),sep="")
     cat("\\subsubsection*{Regime 2:", tit, "}", "\n")
     cat("Parameter Estimates", "\\\\\n")
@@ -527,18 +550,23 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
     cat ("\n")
 
   }
-
-  if (graph==TRUE) {
+  # Produce a graph of the criterion function and related test
+  if (graph == TRUE) {
     xxlim <- range(qs)
     yylim <- range(rbind(lr,c1))
     clr <- matrix(c(1),qn,1)*c1
-    plot(qs,lr,lty=1,col=1,xlim=xxlim,ylim=yylim,type="l",ann=0)
-    lines(qs,clr,lty=2,col=2)
-    xxlab <- paste(c("Threshold Variable: "),qname,sep="")
-    title(main="Confidence Interval Construction for Threshold",
-          xlab=xxlab,ylab="Likelihood Ratio Sequence in gamma")
-    tit <- paste(conf1*100,c("% Critical"),sep="")
-    legend("bottomright",c("LRn(gamma)",tit),lty=c(1,2),col=c(1,2))
+    plot(
+      qs, lr, lty = 1, col = 1,
+      xlim = xxlim, ylim = yylim, type = "l", ann = 0)
+    lines(qs, clr, lty = 2, col = 2)
+    xxlab <- paste(c("Threshold Variable: "),qname, sep = "")
+    title(
+      main = "Confidence Interval Construction for Threshold",
+      xlab = xxlab, ylab = "Likelihood Ratio Sequence in gamma")
+    tit <- paste(conf1*100,c("% Critical"), sep = "")
+    legend(
+      "bottomright", c("LRn(gamma)", tit),
+      lty = c(1, 2), col = c(1, 2))
   }
 
   # Define notation for significance levels for threshold estimate
@@ -634,7 +662,107 @@ thr_est <- function(df, yi, xi, qi, h, test.pvalue, var.names = colnames(df),
           sep = "\n")
     }
   }
+  # No Threshold --------------------------------------------
+  null_model <- list(
+    # Coefficients
+    beta = beta,
+    # Standard Errors
+    se = se,
+    # Other model selection components
+    r2 = r_2,
+    r2_adj = r_2_adj,
+    aic = aic,
+    bic = bic,
+    hqc = hqc,
+    e = e,
+    # Sum of squared errors
+    sse = ee,
+    sig = sig,
+    # HTSK test
+    htsk_test = het_test(e, x)
+  )
+  # Full Model ----------------------------------------------
+  full_model <- list(
+    # Normal Summary stats
+    n = n,
+    dof = n - k,
+    # Model Selection
+    r2 = r2_joint,
+    r2_adj = r2_adj_joint,
+    aic = aic_joint,
+    bic = bic_joint,
+    hqc = hqc_joint,
+    e = ej,
+    sse = ee1 + ee2,
+    htsk_test = het_test(ej, x)
+  )
+  # Regime 1 - this should be z < threshold -------------------
+  regime_1 <- list(
+    beta = beta1,
+    # standard errors
+    se = se1,
+    # Summary Stats
+    n = n1,
+    dof = n1 - k,
+    # Other model selection components
+    r2 = r2_1,
+    r2_adj = r2_adj_1,
+    aic = aic_1,
+    bic = bic_1,
+    hqc = hqc_1,
+    e = e1,
+    sse = ee1,
+    sig = sig1
+  )
 
-  qhat
+  # Regime 2 - this should be z > threshold ------------------------
+  regime_2 <- list(
+    beta = beta2,
+    # Standard errors,
+    se = se2,
+    n = n2,
+    dof = n2 - k,
+    # Model Selection Criteria
+    r2 = r2_2,
+    r2_adj = r2_adj_2,
+    aic = aic_2,
+    bic = bic_2,
+    hqc = hqc_2,
+    e = e2,
+    sse = ee2,
+    sig = sig2
+  )
 
+  # Return --------------------------------------------------
+  ret_list <- list(
+    # The actual estimated threshold
+    qhat = qhat,
+    qhat_ci = c(qhat1_list[[2]], qhat2_list[[2]]),
+    # global null model,
+    null_model = null_model,
+    # joint model
+    full_model = full_model,
+    # Individual regimes
+    regime_1 = regime_1,
+    regime_2 = regime_2
+  )
+  # Set class in case we want some methods for this later
+  class(ret_list) <- "thrreg"
+  return(ret_list)
 }
+
+# print method for thrreg ----------------------------------------------
+
+print.thrreg <- function(obj, ...) {
+  # This is a placeholder...
+  # Print threshold first
+
+  # Print Null Model
+
+  # Print Joint Model
+
+  # Print Regime 1
+
+  # Print Regime 2
+}
+
