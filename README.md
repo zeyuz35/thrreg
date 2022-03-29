@@ -1,5 +1,9 @@
 # thrreg
 
+Fork of thrreg package originally by Marcel Kremer, from mlkremer/thrreg, itself a port of Bruce Hansen's code from his website.
+
+This is just aimed at adding some slight modifications so that its interface is more in line with other R packages.
+
 ## Overview
 thrreg estimates the threshold regression model by Hansen (2000). 
 It provides three functions:
@@ -15,7 +19,7 @@ install.packages("thrreg")
 Install development version from GitHub:
 ```r
 # install.packages("devtools")
-devtools::install_github("mlkremer/thrreg")
+devtools::install_github("zeyuz/thrreg")
 ```
 
 ## Usage
