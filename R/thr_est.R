@@ -100,7 +100,7 @@
 #' qhat
 #' }
 #'
-#' @importFrom base graphics legend lines plot title
+#' @importFrom graphics legend lines plot title
 #' @importFrom stats pchisq pnorm
 #'
 #' @export
