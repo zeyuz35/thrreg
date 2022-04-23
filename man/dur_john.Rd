@@ -4,7 +4,8 @@
 \name{dur_john}
 \alias{dur_john}
 \title{Durlauf and Johnson (1995) data}
-\format{A data frame with 96 rows and 7 variables:
+\format{
+A data frame with 96 rows and 7 variables:
 \describe{
   \item{GDPGwth}{GDP growth as log difference between per capita GDP in 1985 and 1960.}
   \item{LogGDP1960}{Log per capita GDP in 1960.}
@@ -16,7 +17,8 @@
   \item{GDP1960}{Per capita GDP in 1960.}
   \item{Literacy}{Fraction of the population over 15 years old that is able
     to read and write in 1960.}
-}}
+}
+}
 \source{
 Original data are reported in the appendix of Durlauf and Johnson (1995),
     pp. 379--380, and can be downloaded under

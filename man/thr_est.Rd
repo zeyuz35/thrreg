@@ -10,18 +10,19 @@ thr_est(
   xi,
   qi,
   h,
-  test.pvalue,
+  test.pvalue = 0.05,
   var.names = colnames(df),
-  conf2 = 0.8,
+  conf2 = 0.95,
   nonpar = 2,
-  graph = TRUE,
+  graph = FALSE,
+  latex = FALSE,
   signif.level = "stars",
   inf.crit = FALSE,
   digits = 3,
   integer.digits = NULL,
   digits.thr = digits,
   header = NULL,
-  output.short = FALSE,
+  output.short = TRUE,
   signif.legend = TRUE
 )
 }
