@@ -687,6 +687,24 @@ thr_est <- function(
       }
     }
   }
+  # Clean up names
+  xnames <- beta |> rownames()
+  xnames[1] <- "(Intercept)"
+
+  rownames(beta1) <- xnames
+  rownames(beta2) <- xnames
+
+  rownames(varcov) <- xnames
+  colnamaes(varcov) <- xnames
+  rownames(varcov1) <- xnames
+  colnamaes(varcov1) <- xnames
+  rownames(varcov2) <- xnames
+  colnamaes(varcov2) <- xnames
+
+  names(se) <- xnames
+  names(se1) <- xnames
+  names(se2) <- xnames
+
   # No Threshold --------------------------------------------
   null_model <- list(
     # Coefficients
@@ -799,6 +817,29 @@ print.thrreg <- function(obj, ...) {
 # This is useful for directly extracting the coefficients, just to make it
 # a little easier to interface with
 
+coef.thrreg <- function(
+    obj, model = "all"
+) {
+  if (model == "all") {
+    coef_list <- list(
+      null_model = obj$null_model$beta,
+      regime_1 = obj$regime_1$beta,
+      regime_2 = obj$regime_2$beta
+    )
+  }
+  else if (model == "null") {
+    beta_list <- obj$null_model$beta
+  }
+  else if (model == "1") {
+    beta_list <- obj$regime_1$beta
+  }
+  else if (model == "2") {
+    beta_list <- obj$regime_2$beta
+  }
+  # return
+  return(coef_list)
+}
+
 # vcov method ---------------------------------------------------------
 
 # Similar to above, dedicated vcov method to make it easier to get standard
@@ -814,12 +855,12 @@ vcov.thrreg <- function(
     var_list <- list(
       null_model = obj$null_model$varcov,
       regime_1 = obj$regime_1$varcov,
-      regime_2 = obj$regime_2$varcov,
+      regime_2 = obj$regime_2$varcov
     )
     se_list <- list(
       null_model = obj$null_model$se,
       regime_1 = obj$regime_1$se,
-      regime_2 = obj$regime_2$se,
+      regime_2 = obj$regime_2$se
     )
   }
   else if (model == "null") {
@@ -836,9 +877,46 @@ vcov.thrreg <- function(
   }
   # return
   if (type == "varcov") {
-    return(ar_list)
+    return(var_list)
   }
   else if (type == "se") {
     return(se_list)
   }
+}
+
+# summary() --------------------------------------------------------
+#
+# Manually using coef() and varcov is still tedious
+# so build in a summary function so that it is easier
+# summary() will rely on coef and vcov
+
+# model = "all" to show all models,
+# can also be "null", "1", "2"
+summary.thrreg <- function(obj, model = "all") {
+  # Prepare coef list
+  coef_list <- coef(obj)
+  # Prepare se list
+  se_list <- vcov(obj, type = "se")
+  # Staple the two together
+  ret_list <- foreach(i = 1:length(coef_list)) %do% {
+    data.frame(
+      coef = coef_list[[i]],
+      se = se_list[[i]])
+  }
+  names(ret_list) <- c("null", "regime_1", "regime_2")
+  if (model == "null") {
+    ret_list <- ret_list$null
+  }
+  else if (model == "1") {
+    ret_list <- ret_list$regime_1
+  }
+  else if (model == "2") {
+    ret_list <- ret_list$regime_2
+  }
+  # return
+  cat("Threshold Estimate:", obj$qhat)
+  cat("\n")
+  cat("Threshold Estimate CIs (95%):", obj$qhat_ci)
+  cat("\n")
+  print(ret_list)
 }
