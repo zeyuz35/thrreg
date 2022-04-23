@@ -116,6 +116,7 @@ thr_est <- function(
   conf2 = .95,
   nonpar = 2,
   graph = FALSE,
+  latex = FALSE,
   signif.level = "stars",
   inf.crit = FALSE,
   digits = 3, integer.digits = NULL, digits.thr = digits,
@@ -409,147 +410,151 @@ thr_est <- function(
     out
   }
 
-  # Long Output -----------------------------------------------------------
-  if (output.short == FALSE) {
-    # Title ----------------------------------------------------------
-    cat(paste0("\\subsection{Estimate Sample Split, Using ", qname, "}"), "\n\n")
+  # Latex output -----------------------------------------------------------
+  if (latex == TRUE) {
+    # Long Output -----------------------------------------------------------
+    if (output.short == FALSE) {
+      # Title ----------------------------------------------------------
+      cat(paste0("\\subsection{Estimate Sample Split, Using ", qname, "}"), "\n\n")
 
-    # Null Model (No Threshold) ---------------------------------------
-    cat("\\subsubsection{Global OLS Estimation, Without Threshold}", "\n")
-    cat("Dependent Variable:     ", yname, "\\\\\n")
-    if (h==1) cat("Heteroskedasticity Correction Used", "\\\\\\\\")
-    if (h==0) cat("OLS Standard Errors Reported", "\\\\\\\\")
-    cat("\n")
-    cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
-    cat("Variable ", "  &  ", "Estimate  ", "  &  ", "St Error", "\\\\\n")
-    cat("\\midrule", "\n")
-    tbeta <- format(beta, digits=4)
-    tse <- format(se, digits=4)
-    for (j in 1:k) {cat(xname[j], "  &  ", tbeta[j], "  &  ", tse[j], "\\\\\n")}
-    cat("\\bottomrule", "\\end{tabular}", sep = "\n")
-    cat("\\bigskip \\\\")
-    cat("\n")
-    cat("Observations:                      ", n, "\\\\\n")
-    cat("Degrees of Freedom:                ", (n-k), "\\\\\n")
-    cat("Sum of Squared Errors:             ", ee, "\\\\\n")
-    cat("Residual Variance:                 ", sig, "\\\\\n")
-    cat("R-squared:                         ", r_2, "\\\\\n")
-    # MK
-    cat("Adjusted R-squared:                ", r_2_adj, "\\\\\n")
-    cat("AIC:                               ", aic, "\\\\\n")
-    cat("BIC:                               ", bic, "\\\\\n")
-    cat("HQC:                               ", hqc, "\\\\\n")
-    # HTSK Test
-    cat("Heteroskedasticity Test (P-Value): ", het_test(e, x), "\\\\\n")
-    cat("\n")
-
-    # Joint Model Output ---------------------------------------------
-    # This is just a summary of joint model selection criteria,
-    # not actual need for outputting joint model intercepts
-    cat("\\subsubsection{Threshold Estimation}", "\n")
-    cat("Threshold Variable:                ", qname, "\\\\\n")
-    cat("Threshold Estimate:                ", qhat, "\\\\\n")
-    tqhat1 <- format(qhat1_list, digits=4)
-    tqhat2 <- format(qhat2_list, digits=4)
-    for (i in 1:length(conf1_levels)) {
-      tit <- paste(c("["),tqhat1[[i]],", ",tqhat2[[i]],c("]"),sep="")
-      cat(conf1_levels[i], "Confidence Interval:          ", tit, "\\\\\n")
-    }
-    cat("Sum of Squared Errors:             ", (ee1+ee2), "\\\\\n")
-    cat("Residual Variance:                 ", sig_jt, "\\\\\n")
-    cat("Joint R-squared:                   ", r2_joint, "\\\\\n")
-    # MK
-    cat("Joint Adjusted R-squared:          ", r2_adj_joint, "\\\\\n")
-    cat("Joint AIC:                         ", aic_joint, "\\\\\n")
-    cat("Joint BIC:                         ", bic_joint, "\\\\\n")
-    cat("Joint HQC:                         ", hqc_joint, "\\\\\n")
-    # HTSK Test
-    cat("Heteroskedasticity Test (P-Value): ", het_test(ej,x), "\\\\\n")
-    cat("\n")
-
-    # Regime 1 Output -----------------------------------------------
-    tit <- paste(qname,"$\\leq$",format(qhat,digits=6),sep="")
-    cat("\\subsubsection*{Regime 1:", tit, "}", "\n")
-    cat("Parameter Estimates", "\\\\\n")
-    cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
-    cat("Variable ", "  &  ", "Estimate  ", "  &  ", "St Error", "\\\\\n")
-    cat("\\midrule", "\n")
-    tbeta1 <- format(beta1, digits=4)
-    tse1 <- format(se1, digits=4)
-    for (j in 1:k) {cat(xname[j], "  &  ", tbeta1[j], "  &  ", tse1[j], "\\\\\n")}
-    cat("\\bottomrule", "\\end{tabular}", sep = "\n")
-    cat("\\bigskip \n")
-    cat("\n")
-
-    for (i in 1:length(conf1_levels)) {
-      cat(conf1_levels[i], "Confidence Regions for Parameters", "\\\\\n")
+      # Null Model (No Threshold) ---------------------------------------
+      cat("\\subsubsection{Global OLS Estimation, Without Threshold}", "\n")
+      cat("Dependent Variable:     ", yname, "\\\\\n")
+      if (h==1) cat("Heteroskedasticity Correction Used", "\\\\\\\\")
+      if (h==0) cat("OLS Standard Errors Reported", "\\\\\\\\")
+      cat("\n")
       cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
-      cat("Variable ", " &   ", "Low         ", "  &  ", "High", "\\\\\n")
+      cat("Variable ", "  &  ", "Estimate  ", "  &  ", "St Error", "\\\\\n")
       cat("\\midrule", "\n")
-      tbeta1l <- format(beta1l_list[[i]], digits=4)
-      tbeta1u <- format(beta1u_list[[i]], digits=4)
-      for (j in 1:k) {cat(xname[j], "  &  ", tbeta1l[j], "  &  ", tbeta1u[j],
-                          "\\\\\n")}
+      tbeta <- format(beta, digits=4)
+      tse <- format(se, digits=4)
+      for (j in 1:k) {cat(xname[j], "  &  ", tbeta[j], "  &  ", tse[j], "\\\\\n")}
+      cat("\\bottomrule", "\\end{tabular}", sep = "\n")
+      cat("\\bigskip \\\\")
+      cat("\n")
+      cat("Observations:                      ", n, "\\\\\n")
+      cat("Degrees of Freedom:                ", (n-k), "\\\\\n")
+      cat("Sum of Squared Errors:             ", ee, "\\\\\n")
+      cat("Residual Variance:                 ", sig, "\\\\\n")
+      cat("R-squared:                         ", r_2, "\\\\\n")
+      # MK
+      cat("Adjusted R-squared:                ", r_2_adj, "\\\\\n")
+      cat("AIC:                               ", aic, "\\\\\n")
+      cat("BIC:                               ", bic, "\\\\\n")
+      cat("HQC:                               ", hqc, "\\\\\n")
+      # HTSK Test
+      cat("Heteroskedasticity Test (P-Value): ", het_test(e, x), "\\\\\n")
+      cat("\n")
+
+      # Joint Model Output ---------------------------------------------
+      # This is just a summary of joint model selection criteria,
+      # not actual need for outputting joint model intercepts
+      cat("\\subsubsection{Threshold Estimation}", "\n")
+      cat("Threshold Variable:                ", qname, "\\\\\n")
+      cat("Threshold Estimate:                ", qhat, "\\\\\n")
+      tqhat1 <- format(qhat1_list, digits=4)
+      tqhat2 <- format(qhat2_list, digits=4)
+      for (i in 1:length(conf1_levels)) {
+        tit <- paste(c("["),tqhat1[[i]],", ",tqhat2[[i]],c("]"),sep="")
+        cat(conf1_levels[i], "Confidence Interval:          ", tit, "\\\\\n")
+      }
+      cat("Sum of Squared Errors:             ", (ee1+ee2), "\\\\\n")
+      cat("Residual Variance:                 ", sig_jt, "\\\\\n")
+      cat("Joint R-squared:                   ", r2_joint, "\\\\\n")
+      # MK
+      cat("Joint Adjusted R-squared:          ", r2_adj_joint, "\\\\\n")
+      cat("Joint AIC:                         ", aic_joint, "\\\\\n")
+      cat("Joint BIC:                         ", bic_joint, "\\\\\n")
+      cat("Joint HQC:                         ", hqc_joint, "\\\\\n")
+      # HTSK Test
+      cat("Heteroskedasticity Test (P-Value): ", het_test(ej,x), "\\\\\n")
+      cat("\n")
+
+      # Regime 1 Output -----------------------------------------------
+      tit <- paste(qname,"$\\leq$",format(qhat,digits=6),sep="")
+      cat("\\subsubsection*{Regime 1:", tit, "}", "\n")
+      cat("Parameter Estimates", "\\\\\n")
+      cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
+      cat("Variable ", "  &  ", "Estimate  ", "  &  ", "St Error", "\\\\\n")
+      cat("\\midrule", "\n")
+      tbeta1 <- format(beta1, digits=4)
+      tse1 <- format(se1, digits=4)
+      for (j in 1:k) {cat(xname[j], "  &  ", tbeta1[j], "  &  ", tse1[j], "\\\\\n")}
       cat("\\bottomrule", "\\end{tabular}", sep = "\n")
       cat("\\bigskip \n")
       cat("\n")
-    }
 
-    cat("Observations:                      ", n1, "\\\\\n")
-    cat("Degrees of Freedom:                ", (n1-k), "\\\\\n")
-    cat("Sum of Squared Errors:             ", ee1, "\\\\\n")
-    cat("Residual Variance:                 ", sig1, "\\\\\n")
-    cat("R-squared:                         ", r2_1, "\\\\\n")
-    # MK
-    cat("Adjusted R-squared:                ", r2_adj_1, "\\\\\n")
-    cat("AIC:                               ", aic_1, "\\\\\n")
-    cat("BIC:                               ", bic_1, "\\\\\n")
-    cat("HQC:                               ", hqc_1, "\\\\\n")
-    #
-    cat("\n")
+      for (i in 1:length(conf1_levels)) {
+        cat(conf1_levels[i], "Confidence Regions for Parameters", "\\\\\n")
+        cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
+        cat("Variable ", " &   ", "Low         ", "  &  ", "High", "\\\\\n")
+        cat("\\midrule", "\n")
+        tbeta1l <- format(beta1l_list[[i]], digits=4)
+        tbeta1u <- format(beta1u_list[[i]], digits=4)
+        for (j in 1:k) {cat(xname[j], "  &  ", tbeta1l[j], "  &  ", tbeta1u[j],
+                            "\\\\\n")}
+        cat("\\bottomrule", "\\end{tabular}", sep = "\n")
+        cat("\\bigskip \n")
+        cat("\n")
+      }
 
-    # Regime 2 Output --------------------------------------------------
-    tit <- paste(qname,"$>$",format(qhat,digits=6),sep="")
-    cat("\\subsubsection*{Regime 2:", tit, "}", "\n")
-    cat("Parameter Estimates", "\\\\\n")
-    cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
-    cat("Variable ", "  &  ", "Estimate  ", "  &  ", "St Error", "\\\\\n")
-    cat("\\midrule", "\n")
-    tbeta2 <- format(beta2, digits=4)
-    tse2 <- format(se2, digits=4)
-    for (j in 1:k) {cat(xname[j], "  &  ", tbeta2[j], "  &  ", tse2[j], "\\\\\n")}
-    cat("\\bottomrule", "\\end{tabular}", sep = "\n")
-    cat("\\bigskip \n")
-    cat("\n")
+      cat("Observations:                      ", n1, "\\\\\n")
+      cat("Degrees of Freedom:                ", (n1-k), "\\\\\n")
+      cat("Sum of Squared Errors:             ", ee1, "\\\\\n")
+      cat("Residual Variance:                 ", sig1, "\\\\\n")
+      cat("R-squared:                         ", r2_1, "\\\\\n")
+      # MK
+      cat("Adjusted R-squared:                ", r2_adj_1, "\\\\\n")
+      cat("AIC:                               ", aic_1, "\\\\\n")
+      cat("BIC:                               ", bic_1, "\\\\\n")
+      cat("HQC:                               ", hqc_1, "\\\\\n")
+      #
+      cat("\n")
 
-    for (i in 1:length(conf1_levels)) {
-      cat(conf1_levels[i], "Confidence Regions for Parameters", "\\\\\n")
+      # Regime 2 Output --------------------------------------------------
+      tit <- paste(qname,"$>$",format(qhat,digits=6),sep="")
+      cat("\\subsubsection*{Regime 2:", tit, "}", "\n")
+      cat("Parameter Estimates", "\\\\\n")
       cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
-      cat("Variable ", "  &  ", "Low         ", "  &  ", "High", "\\\\\n")
+      cat("Variable ", "  &  ", "Estimate  ", "  &  ", "St Error", "\\\\\n")
       cat("\\midrule", "\n")
-      tbeta2l <- format(beta2l_list[[i]], digits=4)
-      tbeta2u <- format(beta2u_list[[i]], digits=4)
-      for (j in 1:k) {cat(xname[j], "  &  ", tbeta2l[j], "  &  ", tbeta2u[j],
-                          "\\\\\n")}
+      tbeta2 <- format(beta2, digits=4)
+      tse2 <- format(se2, digits=4)
+      for (j in 1:k) {cat(xname[j], "  &  ", tbeta2[j], "  &  ", tse2[j], "\\\\\n")}
       cat("\\bottomrule", "\\end{tabular}", sep = "\n")
       cat("\\bigskip \n")
       cat("\n")
+
+      for (i in 1:length(conf1_levels)) {
+        cat(conf1_levels[i], "Confidence Regions for Parameters", "\\\\\n")
+        cat("\\begin{tabular}{l*{2}{r}}", "\\toprule", sep = "\n")
+        cat("Variable ", "  &  ", "Low         ", "  &  ", "High", "\\\\\n")
+        cat("\\midrule", "\n")
+        tbeta2l <- format(beta2l_list[[i]], digits=4)
+        tbeta2u <- format(beta2u_list[[i]], digits=4)
+        for (j in 1:k) {cat(xname[j], "  &  ", tbeta2l[j], "  &  ", tbeta2u[j],
+                            "\\\\\n")}
+        cat("\\bottomrule", "\\end{tabular}", sep = "\n")
+        cat("\\bigskip \n")
+        cat("\n")
+      }
+
+      cat("Observations:                      ", n2, "\\\\\n")
+      cat("Degrees of Freedom:                ", (n2-k), "\\\\\n")
+      cat("Sum of Squared Errors:             ", ee2, "\\\\\n")
+      cat("Residual Variance:                 ", sig2, "\\\\\n")
+      cat("R-squared:                         ", r2_2, "\\\\\n")
+      # MK
+      cat("Adjusted R-squared:                ", r2_adj_2, "\\\\\n")
+      cat("AIC:                               ", aic_2, "\\\\\n")
+      cat("BIC:                               ", bic_2, "\\\\\n")
+      cat("HQC:                               ", hqc_2, "\\\\\n")
+      #
+      cat ("\n")
+
     }
-
-    cat("Observations:                      ", n2, "\\\\\n")
-    cat("Degrees of Freedom:                ", (n2-k), "\\\\\n")
-    cat("Sum of Squared Errors:             ", ee2, "\\\\\n")
-    cat("Residual Variance:                 ", sig2, "\\\\\n")
-    cat("R-squared:                         ", r2_2, "\\\\\n")
-    # MK
-    cat("Adjusted R-squared:                ", r2_adj_2, "\\\\\n")
-    cat("AIC:                               ", aic_2, "\\\\\n")
-    cat("BIC:                               ", bic_2, "\\\\\n")
-    cat("HQC:                               ", hqc_2, "\\\\\n")
-    #
-    cat ("\n")
-
   }
+
   # Produce a graph of the criterion function and related test
   if (graph == TRUE) {
     xxlim <- range(qs)
@@ -595,71 +600,74 @@ thr_est <- function(
     integer.digits <- max(nchar(n1), nchar(n2))
   }
 
-  # MK: Summarizing threshold regression table with Regime 1 (left) and
-  # Regime 2 (right)
-  if (output.short == FALSE) {
-    cat("\\subsubsection*{Threshold Regression Table}", "\n")
-  }
-  cat(paste0("\\begin{tabular}{l*{2}{S[table-format=", integer.digits, ".",
-             digits,"]r}}"),
-      "\\toprule", sep = "\n")
-  if (!is.null(header)) {
-    cat("&", paste0("\\multicolumn{4}{c}{", header, "}"), "\\\\\n")
-    cat("\\cmidrule(lr){2-5}", "\n")
-  }
-  cat("&", "\\multicolumn{2}{c}{Regime 1}", "&", "\\multicolumn{2}{c}{Regime 2}",
-      "\\\\\n")
-  cat("\\cmidrule(lr){2-3}", "\\cmidrule(lr){4-5}", sep = "\n")
-  cat("&", paste0("\\multicolumn{2}{c}{", qname, tstars_thr, " $\\leq$ ",
-                  format(round(qhat, digits=digits.thr), nsmall=digits.thr), "}"),
-      "&", paste0("\\multicolumn{2}{c}{", qname, tstars_thr, " $>$ ",
-                  format(round(qhat, digits=digits.thr), nsmall=digits.thr), "}"),
-      "\\\\\n")
-  cat("\\cmidrule(lr){2-3}", "\\cmidrule(lr){4-5}", sep = "\n")
-  cat("{Variable}", "&", "{Estimate}", "&", "{Std error}", "&", "{Estimate}", "&",
-      "{Std error}", "\\\\\n")
-  cat("\\midrule", "\n")
-  tbeta1 <- format(round(beta1, digits=digits), nsmall=digits)
-  tse1 <- format(round(se1, digits=digits), nsmall=digits)
-  tbeta2 <- format(round(beta2, digits=digits), nsmall=digits)
-  tse2 <- format(round(se2, digits=digits), nsmall=digits)
-  for (j in 1:k) {
-    cat(xname[j], "&", paste0(tbeta1[j], tstars1[j]), "&", paste0("(", tse1[j], ")"),
-        "&", paste0(tbeta2[j], tstars2[j]), "&", paste0("(", tse2[j], ")"), "\\\\\n")
-  }
-  r2_1 <- format(round(r2_1, digits=digits), nsmall=digits)
-  r2_2 <- format(round(r2_2, digits=digits), nsmall=digits)
-  r2_adj_1 <- format(round(r2_adj_1, digits=digits), nsmall=digits)
-  r2_adj_2 <- format(round(r2_adj_2, digits=digits), nsmall=digits)
-  aic_1 <- round(aic_1)
-  aic_2 <- round(aic_2)
-  bic_1 <- round(bic_1)
-  bic_2 <- round(bic_2)
-  hqc_1 <- round(hqc_1)
-  hqc_2 <- round(hqc_2)
-  cat("\\midrule", "\n")
-  cat("\\#Obs", "&", n1, "& &", n2, "&", "\\\\\n")
-  # cat("Degrees of Freedom ", "  &  ", (n1-k), "  &  & ", (n2-k), "  &  ", "\\\\\n")
-  # cat("Sum of Squared Errors ", "  &  ", ee1, "  &  & ", ee2, "  &  ", "\\\\\n")
-  # cat("Residual Variance ", "  &  ", sig1, "  &  & ", sig2, "  &  ", "\\\\\n")
-  # cat("$R^2$ ", "  &  ", r2_1, "  &  & ", r2_2, "  &  ", "\\\\\n")
-  cat("$R^2_\\text{adj}$", "&", r2_adj_1, "& &", r2_adj_2, "&", "\\\\\n")
-  if (inf.crit == TRUE) {
-    cat("AIC", "&", aic_1, "& &", aic_2, "&", "\\\\\n")
-    cat("BIC", "&", bic_1, "& &", bic_2, "&", "\\\\\n")
-    cat("HQC", "&", hqc_1, "& &", hqc_2, "&", "\\\\\n")
-  }
-  cat("\\bottomrule", "\\end{tabular}", sep = "\n")
+  # More latex output ------------------------------------------------
+  if (latex == TRUE) {
+    # MK: Summarizing threshold regression table with Regime 1 (left) and
+    # Regime 2 (right)
+    if (output.short == FALSE) {
+      cat("\\subsubsection*{Threshold Regression Table}", "\n")
+    }
+    cat(paste0("\\begin{tabular}{l*{2}{S[table-format=", integer.digits, ".",
+               digits,"]r}}"),
+        "\\toprule", sep = "\n")
+    if (!is.null(header)) {
+      cat("&", paste0("\\multicolumn{4}{c}{", header, "}"), "\\\\\n")
+      cat("\\cmidrule(lr){2-5}", "\n")
+    }
+    cat("&", "\\multicolumn{2}{c}{Regime 1}", "&", "\\multicolumn{2}{c}{Regime 2}",
+        "\\\\\n")
+    cat("\\cmidrule(lr){2-3}", "\\cmidrule(lr){4-5}", sep = "\n")
+    cat("&", paste0("\\multicolumn{2}{c}{", qname, tstars_thr, " $\\leq$ ",
+                    format(round(qhat, digits=digits.thr), nsmall=digits.thr), "}"),
+        "&", paste0("\\multicolumn{2}{c}{", qname, tstars_thr, " $>$ ",
+                    format(round(qhat, digits=digits.thr), nsmall=digits.thr), "}"),
+        "\\\\\n")
+    cat("\\cmidrule(lr){2-3}", "\\cmidrule(lr){4-5}", sep = "\n")
+    cat("{Variable}", "&", "{Estimate}", "&", "{Std error}", "&", "{Estimate}", "&",
+        "{Std error}", "\\\\\n")
+    cat("\\midrule", "\n")
+    tbeta1 <- format(round(beta1, digits=digits), nsmall=digits)
+    tse1 <- format(round(se1, digits=digits), nsmall=digits)
+    tbeta2 <- format(round(beta2, digits=digits), nsmall=digits)
+    tse2 <- format(round(se2, digits=digits), nsmall=digits)
+    for (j in 1:k) {
+      cat(xname[j], "&", paste0(tbeta1[j], tstars1[j]), "&", paste0("(", tse1[j], ")"),
+          "&", paste0(tbeta2[j], tstars2[j]), "&", paste0("(", tse2[j], ")"), "\\\\\n")
+    }
+    r2_1 <- format(round(r2_1, digits=digits), nsmall=digits)
+    r2_2 <- format(round(r2_2, digits=digits), nsmall=digits)
+    r2_adj_1 <- format(round(r2_adj_1, digits=digits), nsmall=digits)
+    r2_adj_2 <- format(round(r2_adj_2, digits=digits), nsmall=digits)
+    aic_1 <- round(aic_1)
+    aic_2 <- round(aic_2)
+    bic_1 <- round(bic_1)
+    bic_2 <- round(bic_2)
+    hqc_1 <- round(hqc_1)
+    hqc_2 <- round(hqc_2)
+    cat("\\midrule", "\n")
+    cat("\\#Obs", "&", n1, "& &", n2, "&", "\\\\\n")
+    # cat("Degrees of Freedom ", "  &  ", (n1-k), "  &  & ", (n2-k), "  &  ", "\\\\\n")
+    # cat("Sum of Squared Errors ", "  &  ", ee1, "  &  & ", ee2, "  &  ", "\\\\\n")
+    # cat("Residual Variance ", "  &  ", sig1, "  &  & ", sig2, "  &  ", "\\\\\n")
+    # cat("$R^2$ ", "  &  ", r2_1, "  &  & ", r2_2, "  &  ", "\\\\\n")
+    cat("$R^2_\\text{adj}$", "&", r2_adj_1, "& &", r2_adj_2, "&", "\\\\\n")
+    if (inf.crit == TRUE) {
+      cat("AIC", "&", aic_1, "& &", aic_2, "&", "\\\\\n")
+      cat("BIC", "&", bic_1, "& &", bic_2, "&", "\\\\\n")
+      cat("HQC", "&", hqc_1, "& &", hqc_2, "&", "\\\\\n")
+    }
+    cat("\\bottomrule", "\\end{tabular}", sep = "\n")
 
-  if (signif.legend == TRUE) {
-    cat("\\smallskip \\\\\n")
-    if (signif.level == "stars") {
-      cat("$^\\ast p<0.1$; $^{\\ast\\ast} p<0.05$; $^{\\ast\\ast\\ast} p<0.01$", "\n")
-    } else if (signif.level == "colors") {
-      cat("\\colorbox{\\RedC}{\\makebox(20,6){}}/\\colorbox{\\BlueC}{\\makebox(20,6){}} $p<0.1$;",
-          "\\colorbox{\\RedB}{\\makebox(20,6){}}/\\colorbox{\\BlueB}{\\makebox(20,6){}} $p<0.05$;",
-          "\\colorbox{\\RedA}{\\makebox(20,6){}}/\\colorbox{\\BlueA}{\\makebox(20,6){}} $p<0.01$",
-          sep = "\n")
+    if (signif.legend == TRUE) {
+      cat("\\smallskip \\\\\n")
+      if (signif.level == "stars") {
+        cat("$^\\ast p<0.1$; $^{\\ast\\ast} p<0.05$; $^{\\ast\\ast\\ast} p<0.01$", "\n")
+      } else if (signif.level == "colors") {
+        cat("\\colorbox{\\RedC}{\\makebox(20,6){}}/\\colorbox{\\BlueC}{\\makebox(20,6){}} $p<0.1$;",
+            "\\colorbox{\\RedB}{\\makebox(20,6){}}/\\colorbox{\\BlueB}{\\makebox(20,6){}} $p<0.05$;",
+            "\\colorbox{\\RedA}{\\makebox(20,6){}}/\\colorbox{\\BlueA}{\\makebox(20,6){}} $p<0.01$",
+            sep = "\n")
+      }
     }
   }
   # No Threshold --------------------------------------------
