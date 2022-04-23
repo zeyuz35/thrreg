@@ -797,8 +797,7 @@ thr_est <- function(
   return(ret_list)
 }
 
-# print method for thrreg ----------------------------------------------
-
+#' @export
 print.thrreg <- function(obj, ...) {
   # This is a placeholder...
   # Print threshold first
@@ -812,8 +811,7 @@ print.thrreg <- function(obj, ...) {
   # Print Regime 2
 }
 
-# coef() method -------------------------------------------------------
-
+#' @export
 # This is useful for directly extracting the coefficients, just to make it
 # a little easier to interface with
 
@@ -840,8 +838,7 @@ coef.thrreg <- function(
   return(coef_list)
 }
 
-# vcov method ---------------------------------------------------------
-
+#' @export
 # Similar to above, dedicated vcov method to make it easier to get standard
 # errors, etc
 
@@ -884,7 +881,7 @@ vcov.thrreg <- function(
   }
 }
 
-# summary() --------------------------------------------------------
+#' @export
 #
 # Manually using coef() and varcov is still tedious
 # so build in a summary function so that it is easier
