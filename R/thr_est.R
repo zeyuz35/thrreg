@@ -695,11 +695,11 @@ thr_est <- function(
   rownames(beta2) <- xnames
 
   rownames(varcov) <- xnames
-  colnamaes(varcov) <- xnames
+  colnames(varcov) <- xnames
   rownames(varcov1) <- xnames
-  colnamaes(varcov1) <- xnames
+  colnames(varcov1) <- xnames
   rownames(varcov2) <- xnames
-  colnamaes(varcov2) <- xnames
+  colnames(varcov2) <- xnames
 
   names(se) <- xnames
   names(se1) <- xnames
