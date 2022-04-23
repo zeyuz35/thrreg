@@ -156,8 +156,15 @@ thr_est <- function(
   ee <- t(e)%*%e
   sig <- ee/(n-k)
   xe <- x*(e %*% matrix(c(1),1,k))
-  if (h==0) {se <- sqrt(diag(mi)*sig)
-  }else{ se <- sqrt(diag(mi %*% t(xe) %*% xe %*% mi))}
+  # variance covariance matrix
+  if (h == 0) {
+    varcov <- (mi)*sig
+    se <- varcov |> diag() |> sqrt()
+  }
+  else{
+    varcov <- (mi %*% t(xe) %*% xe %*% mi)
+    se <- varcov |> diag() |> sqrt()
+    }
   vy <- sum((y - mean(y))^2)
   r_2 <- 1-ee/vy
 
@@ -190,9 +197,12 @@ thr_est <- function(
     xeir <- matrix(xeir,nrow=nrow(xeir)/k,ncol=k)
     sume <- sume + colSums(xeir)
     mmi <- mm - mm%*%mi%*%mm
-    if ((ci > k+1)*(ci < (n-k-1))){
+    if ((ci > k+1)*(ci < (n-k-1))) {
       sn[r] <- ee - t(sume)%*%solve(mmi, tol = 1e-1000)%*%sume
-    }else{ sn[r] <- ee}
+    }
+    else {
+      sn[r] <- ee
+      }
     r <- r+1
   }
 
@@ -218,19 +228,26 @@ thr_est <- function(
   ej <- rbind(e1,e2)
   n1 <- nrow(y1)
   n2 <- nrow(y2)
-  ee1 <- t(e1)%*%e1
-  ee2 <- t(e2)%*%e2
+  ee1 <- t(e1) %*% e1
+  ee2 <- t(e2) %*% e2
   sig1 <- ee1/(n1-k)
   sig2 <- ee2/(n2-k)
-  sig_jt <- (ee1+ee2)/(n-k*2)
-  if (h==0){
-    se1 <- sqrt(diag(mi1)*sig_jt)
-    se2 <- sqrt(diag(mi2)*sig_jt)
+  sig_jt <- (ee1 + ee2)/(n - k*2)
+
+  # Variance covariance matrices
+  if (h == 0) {
+    # variance covariance matrix
+    varcov1 <- mi1 * sig_jt
+    varcov2 <- mi2 * sig_jt
+    se1 <- varcov1 |> diag() |> sqrt()
+    se2 <- varcov2 |> diag() |> sqrt()
   } else {
-    xe1 <- x1*(e1%*%matrix(c(1),1,k))
-    xe2 <- x2*(e2%*%matrix(c(1),1,k))
-    se1 <- sqrt(diag(mi1%*%t(xe1)%*%xe1%*%mi1))
-    se2 <- sqrt(diag(mi2%*%t(xe2)%*%xe2%*%mi2))
+    xe1 <- x1*(e1 %*% matrix(c(1), 1, k))
+    xe2 <- x2*(e2 %*% matrix(c(1), 1, k))
+    varcov1 <- (mi1 %*% t(xe1) %*% xe1 %*% mi1)
+    varcov2 <- (mi2 %*% t(xe2) %*% xe2 %*% mi2)
+    se1 <- varcov1 |> diag() |> sqrt()
+    se2 <- varcov2 |> diag() |> sqrt()
   }
   vy1 <- sum((y1 - mean(y1))^2)
   vy2 <- sum((y2 - mean(y2))^2)
@@ -676,6 +693,7 @@ thr_est <- function(
     beta = beta,
     # Standard Errors
     se = se,
+    varcov = varcov,
     # Other model selection components
     r2 = r_2,
     r2_adj = r_2_adj,
@@ -708,6 +726,7 @@ thr_est <- function(
   regime_1 <- list(
     beta = beta1,
     # standard errors
+    varcov = varcov1,
     se = se1,
     # Summary Stats
     n = n1,
@@ -728,6 +747,7 @@ thr_est <- function(
     beta = beta2,
     # Standard errors,
     se = se2,
+    varcov = varcov2,
     n = n2,
     dof = n2 - k,
     # Model Selection Criteria
@@ -774,3 +794,51 @@ print.thrreg <- function(obj, ...) {
   # Print Regime 2
 }
 
+# coef() method -------------------------------------------------------
+
+# This is useful for directly extracting the coefficients, just to make it
+# a little easier to interface with
+
+# vcov method ---------------------------------------------------------
+
+# Similar to above, dedicated vcov method to make it easier to get standard
+# errors, etc
+
+# By default, this returns the vanilla variance covariance matrix of the
+# coefficients
+
+vcov.thrreg <- function(
+  obj, type = "varcov", model = "all"
+  ) {
+  if (model == "all") {
+    var_list <- list(
+      null_model = obj$null_model$varcov,
+      regime_1 = obj$regime_1$varcov,
+      regime_2 = obj$regime_2$varcov,
+    )
+    se_list <- list(
+      null_model = obj$null_model$se,
+      regime_1 = obj$regime_1$se,
+      regime_2 = obj$regime_2$se,
+    )
+  }
+  else if (model == "null") {
+    var_list <- obj$null_model$varcov
+    se_list <- obj$null_model$se
+  }
+  else if (model == "1") {
+    var_list <- obj$regime_1$varcov
+    se_list <- obj$regime_1$se
+  }
+  else if (model == "2") {
+    var_list <- obj$regime_2$varcov
+    se_list <- obj$regime_2$se
+  }
+  # return
+  if (type == "varcov") {
+    return(ar_list)
+  }
+  else if (type == "se") {
+    return(se_list)
+  }
+}
